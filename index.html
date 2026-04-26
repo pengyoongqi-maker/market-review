@@ -35,20 +35,20 @@
     .topbar-right { display: flex; gap: 6px; align-items: center; }
 
     button { border: none; cursor: pointer; font: inherit; transition: .15s ease; }
-    .icon-btn {
-      width: 38px; height: 38px; border-radius: var(--radius);
+    .tb-btn {
+      height: 30px; padding: 0 12px; border-radius: 2px;
       background: var(--surface-2); border: 1px solid var(--line-2);
-      color: var(--muted-2); display: flex; align-items: center; justify-content: center; font-size: 16px;
+      color: var(--muted-2); display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
     }
-    .icon-btn:hover { background: var(--surface-3); color: var(--white); }
+    .tb-btn:hover { border-color: var(--muted-2); color: var(--text); }
     .new-btn {
       height: 38px; padding: 0 14px; border-radius: var(--radius);
       background: var(--white); color: var(--bg);
       font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
       display: flex; align-items: center; gap: 6px;
     }
-    [data-theme="light"] .new-btn { background: #111; color: #fff; }
-    .new-btn:hover { opacity: .85; }
+    [data-theme="light"] .tb-btn.primary { background: #111; color: #fff; border-color: #111; }
+    .tb-btn.primary:hover { opacity: .85; }
 
     .statusbar {
       display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
@@ -98,7 +98,7 @@
       font-family: "SF Mono","Fira Code",monospace; transition: .15s;
       display: flex; align-items: center; gap: 5px;
     }
-    .tick-chip:hover { background: var(--surface-3); color: var(--white); }
+    .tick-chip:hover { border-color: var(--muted-2); color: var(--text); }
     .tick-chip.active { background: var(--white); color: var(--bg); border-color: var(--white); }
     [data-theme="light"] .tick-chip.active { background: #111; color: #fff; border-color: #111; }
     .tick-chip .del-chip { font-size: 10px; opacity: .5; line-height: 1; }
@@ -158,15 +158,15 @@
       <div class="brand-sub">黄金 · A股 · 本地存储</div>
     </div>
     <div class="topbar-right">
-      <button class="icon-btn" id="themeBtn" title="切换亮/暗色">◑</button>
-      <button class="icon-btn" id="toggleAllBtn" title="展开 / 折叠">⊞</button>
-      <button class="icon-btn" id="syncConfigBtn" title="配置 Gist 同步">⚙</button>
-      <button class="icon-btn" id="syncPushBtn" title="上传到 Gist（备份）">↑</button>
-      <button class="icon-btn" id="syncPullBtn" title="从 Gist 拉取（恢复）">↓</button>
-      <button class="icon-btn" id="exportHtmlBtn" title="导出 HTML 归档快照">⬡</button>
-      <button class="icon-btn" id="exportAllBtn" title="导出全部 CSV">⊞</button>
-      <button class="icon-btn" id="printBtn" title="打印">⎙</button>
-      <button class="icon-btn" id="csvImportBtn" title="导入CSV">↥</button>         <button class="icon-btn" id="gistPushBtn" title="推送到Gist">↑</button>         <button class="icon-btn" id="gistPullBtn" title="从Gist拉取">↓</button>         <button class="new-btn" id="newRecordBtn">＋ 新建</button>
+      <button class="tb-btn" id="themeBtn" title="切换亮/暗色">◑</button>
+      <button class="tb-btn" id="toggleAllBtn" title="展开 / 折叠">⊞</button>
+      <button class="tb-btn" id="syncConfigBtn" title="配置 Gist 同步">⚙</button>
+      <button class="tb-btn" id="syncPushBtn" title="上传到 Gist（备份）">↑</button>
+      <button class="tb-btn" id="syncPullBtn" title="从 Gist 拉取（恢复）">↓</button>
+      <button class="tb-btn" id="exportHtmlBtn" title="导出 HTML 归档快照">⬡</button>
+      <button class="tb-btn" id="exportAllBtn" title="导出全部 CSV">⊞</button>
+      
+      <button class="tb-btn" id="csvImportBtn" title="导入CSV">↥</button>         <button class="tb-btn" id="gistPushBtn" title="推送到Gist">↑</button>         <button class="tb-btn" id="gistPullBtn" title="从Gist拉取">↓</button>         <button class="tb-btn primary" id="newRecordBtn">+ 新建</button>
     </div>
   </header>
 
@@ -207,7 +207,7 @@
   const sDot       = document.getElementById('sDot');
   let allOpen = false;
 
-  document.getElementById('themeBtn').addEventListener('click', () => {
+  function toggleTheme() {
     document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
     // refresh all chart iframes to match new theme
     document.querySelectorAll('.chart-frame').forEach(iframe => {
