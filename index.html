@@ -166,7 +166,7 @@
       <button class="icon-btn" id="exportHtmlBtn" title="导出 HTML 归档快照">⬡</button>
       <button class="icon-btn" id="exportAllBtn" title="导出全部 CSV">⊞</button>
       <button class="icon-btn" id="printBtn" title="打印">⎙</button>
-      <button class="new-btn" id="gistPushBtn" title="推送到Gist">↑</button>         <button class="icon-btn" id="gistPullBtn" title="从Gist拉取">↓</button>         <button class="new-btn" id="newRecordBtn">＋ 新建</button>
+      <button class="new-btn" id="csvImportBtn" title="导入CSV">↥</button>         <button class="icon-btn" id="gistPushBtn" title="推送到Gist">↑</button>         <button class="icon-btn" id="gistPullBtn" title="从Gist拉取">↓</button>         <button class="new-btn" id="newRecordBtn">＋ 新建</button>
     </div>
   </header>
 
@@ -547,7 +547,8 @@
 
   renderAll();
 </script>
-    // — GIST SYNC —
+    // — CSV IMPORT —   document.getElementById('csvImportBtn').addEventListener('click', () => {     const input = document.createElement('input');     input.type = 'file'; input.accept = '.csv';     input.onchange = e => {       const file = e.target.files[0]; if (!file) return;       const reader = new FileReader();       reader.onload = ev => {         const lines = ev.target.result.split('
+').filter(l => l.trim());         if (!lines.length) return;         // skip header row if present         const start = lines[0].startsWith('日期') || lines[0].startsWith('date') ? 1 : 0;         const map = {}; // date -> {gold:[], ashare:[]}         for (let i = start; i < lines.length; i++) {           const cols = lines[i].split(',');           if (cols.length < 7) continue;           const date = cols[0].trim();           const type = cols[1].trim(); // '' or 'A股'           const row = { phase: cols[2]||'', judgment: cols[3]||'', levels: cols[4]||'', strategy: cols[5]||'', invalidation: cols[6]||'' };           if (!map[date]) map[date] = { gold: [], ashare: [] };           if (type === 'A股' || type === 'ashare') map[date].ashare.push(row);           else map[date].gold.push(row);         }         let imported = 0;         Object.entries(map).forEach(([date, v]) => {           const existing = localStorage.getItem('journal_' + date);           let rec = existing ? JSON.parse(existing) : defaultRecord(date);           if (v.gold.length) rec.gold = v.gold.slice(0, 5);           if (v.ashare.length) rec.ashare = v.ashare.slice(0, 5);           save(date, rec); imported++;         });         statusText.textContent = '导入完成 · ' + imported + ' 条记录';         setTimeout(() => renderAll(), 500);       };       reader.readAsText(file, 'utf-8');     };     input.click();   });    // — GIST SYNC —
   const GIST_TOKEN = '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';
   const GIST_ID    = '3d0ef26fde84e4c438ca4babbe75d536';
   const GIST_FILE  = 'review_data.json';
