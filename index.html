@@ -166,7 +166,7 @@
       <button class="icon-btn" id="exportHtmlBtn" title="导出 HTML 归档快照">⬡</button>
       <button class="icon-btn" id="exportAllBtn" title="导出全部 CSV">⊞</button>
       <button class="icon-btn" id="printBtn" title="打印">⎙</button>
-      <button class="new-btn" id="newRecordBtn">＋ 新建</button>
+      <button class="new-btn" id="gistPushBtn" title="推送到Gist">↑</button>         <button class="icon-btn" id="gistPullBtn" title="从Gist拉取">↓</button>         <button class="new-btn" id="newRecordBtn">＋ 新建</button>
     </div>
   </header>
 
@@ -547,5 +547,47 @@
 
   renderAll();
 </script>
+    // — GIST SYNC —
+  const GIST_TOKEN = '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';
+  const GIST_ID    = '3d0ef26fde84e4c438ca4babbe75d536';
+  const GIST_FILE  = 'review_data.json';
+
+  async function gistPush() {
+    const backup = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k.startsWith('journal_') || k.startsWith('presets_')) backup[k] = localStorage.getItem(k);
+    }
+    statusText.textContent = '正在推送到 Gist…';
+    try {
+      const r = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+        method: 'PATCH',
+        headers: { Authorization: `token ${GIST_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ files: { [GIST_FILE]: { content: JSON.stringify(backup, null, 2) } } })
+      });
+      if (!r.ok) throw new Error(await r.text());
+      statusText.textContent = '✓ 已推送到 Gist · ' + new Date().toLocaleTimeString('zh-CN');
+    } catch(e) { statusText.textContent = '推送失败: ' + e.message; }
+  }
+
+  async function gistPull() {
+    statusText.textContent = '正在从 Gist 拉取…';
+    try {
+      const r = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+        headers: { Authorization: `token ${GIST_TOKEN}` }
+      });
+      if (!r.ok) throw new Error(await r.text());
+      const j = await r.json();
+      const raw = j.files[GIST_FILE]?.content;
+      if (!raw) throw new Error('文件不存在');
+      const data = JSON.parse(raw);
+      Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
+      statusText.textContent = '✓ 拉取完成，正在刷新…';
+      setTimeout(() => location.reload(), 800);
+    } catch(e) { statusText.textContent = '拉取失败: ' + e.message; }
+  }
+
+  document.getElementById('gistPushBtn').addEventListener('click', gistPush);
+  document.getElementById('gistPullBtn').addEventListener('click', gistPull);
 </body>
 </html>
